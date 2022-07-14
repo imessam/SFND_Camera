@@ -5,6 +5,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/xfeatures2d/nonfree.hpp>
+#include "string.h"
 
 void descKeypoints1()
 {
@@ -15,24 +16,24 @@ void descKeypoints1()
 
     // BRISK detector / descriptor
     cv::Ptr<cv::FeatureDetector> detector = cv::BRISK::create();
-    vector<cv::KeyPoint> kptsBRISK;
+    std::vector<cv::KeyPoint> kptsBRISK;
 
     double t = (double)cv::getTickCount();
     detector->detect(imgGray, kptsBRISK);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "BRISK detector with n= " << kptsBRISK.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+    std::cout << "BRISK detector with n= " << kptsBRISK.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << std::endl;
 
     cv::Ptr<cv::DescriptorExtractor> descriptor = cv::BRISK::create();
     cv::Mat descBRISK;
     t = (double)cv::getTickCount();
     descriptor->compute(imgGray, kptsBRISK, descBRISK);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "BRISK descriptor in " << 1000 * t / 1.0 << " ms" << endl;
+    std::cout << "BRISK descriptor in " << 1000 * t / 1.0 << " ms" << std::endl;
 
     // visualize results
     cv::Mat visImage = img.clone();
     cv::drawKeypoints(img, kptsBRISK, visImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-    string windowName = "BRISK Results";
+    std::string windowName = "BRISK Results";
     cv::namedWindow(windowName, 1);
     imshow(windowName, visImage);
     cv::waitKey(0);
@@ -42,20 +43,20 @@ void descKeypoints1()
     // with regard to processing speed and the number and 
     // visual appearance of keypoints.
 
-    detector = cv::SIFT::create();
-    vector<cv::KeyPoint> kptsSIFT;
+    detector = cv::xfeatures2d::SIFT::create();
+    std::vector<cv::KeyPoint> kptsSIFT;
 
-    double t = (double)cv::getTickCount();
+    t = (double)cv::getTickCount();
     detector->detect(imgGray, kptsSIFT);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "SIFT detector with n= " << kptsSIFT.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+    std::cout << "SIFT detector with n= " << kptsSIFT.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << std::endl;
 
-    descriptor = cv::SIFT::create();
+    descriptor = cv::xfeatures2d::SIFT::create();
     cv::Mat descSIFT;
     t = (double)cv::getTickCount();
     descriptor->compute(imgGray, kptsSIFT, descSIFT);
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    cout << "SIFT descriptor in " << 1000 * t / 1.0 << " ms" << endl;
+    std::cout << "SIFT descriptor in " << 1000 * t / 1.0 << " ms" << std::endl;
 
     // visualize results
     visImage = img.clone();

@@ -33,6 +33,8 @@ void matchDescriptors(cv::Mat &imgSource, cv::Mat &imgRef, vector<cv::KeyPoint> 
         }
 
         //... TODO : implement FLANN matching
+            // Since SURF is a floating-point descriptor NORM_L2 is used
+        matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED);
         cout << "FLANN matching";
     }
 
@@ -48,9 +50,25 @@ void matchDescriptors(cv::Mat &imgSource, cv::Mat &imgRef, vector<cv::KeyPoint> 
     else if (selectorType.compare("SEL_KNN") == 0)
     { // k nearest neighbors (k=2)
 
+        double t = (double)cv::getTickCount();
         // TODO : implement k-nearest-neighbor matching
+        std::vector< std::vector<cv::DMatch> > knn_matches;
+        matcher->knnMatch( descSource, descRef, knn_matches, 2 );
 
         // TODO : filter matches using descriptor distance ratio test
+        //-- Filter matches using the Lowe's ratio test
+        const float ratio_thresh = 0.8f;
+        for (size_t i = 0; i < knn_matches.size(); i++)
+        {
+            if (knn_matches[i][0].distance < ratio_thresh * knn_matches[i][1].distance)
+            {
+                matches.push_back(knn_matches[i][0]);
+            }
+        }
+
+        t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+        cout << " (KNN) with n=" << matches.size() << " matches in " << 1000 * t / 1.0 << " ms" << endl;
+        cout << "# keypoints removed = " << knn_matches.size() - matches.size() << endl;
     }
 
     // visualize results
@@ -78,8 +96,8 @@ int main()
     readDescriptors("../dat/C35A5_DescRef_BRISK_large.dat", descRef);
 
     vector<cv::DMatch> matches;
-    string matcherType = "MAT_BF"; 
+    string matcherType = "MAT_FLANN"; 
     string descriptorType = "DES_BINARY"; 
-    string selectorType = "SEL_NN"; 
+    string selectorType = "SEL_KNN"; 
     matchDescriptors(imgSource, imgRef, kptsSource, kptsRef, descSource, descRef, matches, descriptorType, matcherType, selectorType);
 }
