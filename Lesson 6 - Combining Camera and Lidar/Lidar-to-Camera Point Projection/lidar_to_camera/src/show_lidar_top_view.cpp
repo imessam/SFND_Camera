@@ -19,23 +19,29 @@ void showLidarTopview()
     // create topview image
     cv::Mat topviewImg(imageSize, CV_8UC3, cv::Scalar(0, 0, 0));
 
+    int subIdx=2,addIdx=1;
+    float ratio = 255.0/20.0;
+
     // plot Lidar points into image
     for (auto it = lidarPoints.begin(); it != lidarPoints.end(); ++it)
-    {
-        float xw = (*it).x; // world position in m with x facing forward from sensor
-        float yw = (*it).y; // world position in m with y facing left from sensor
+    {   
+        if((*it).z >-1){
+            float xw = (*it).x; // world position in m with x facing forward from sensor
+            float yw = (*it).y; // world position in m with y facing left from sensor
 
-        int y = (-xw * imageSize.height / worldSize.height) + imageSize.height;
-        int x = (-yw * imageSize.width / worldSize.width) + imageSize.width / 2;
+            int y = (-xw * imageSize.height / worldSize.height) + imageSize.height;
+            int x = (-yw * imageSize.width / worldSize.width) + imageSize.width / 2;
 
+            cv::Scalar color (0,xw*ratio,255-xw*ratio);
 
-        cv::circle(topviewImg, cv::Point(x, y), 5, cv::Scalar(0, 0, 255), -1);
-        
-        // TODO: 
-        // 1. Change the color of the Lidar points such that 
-        // X=0.0m corresponds to red while X=20.0m is shown as green.
-        // 2. Remove all Lidar points on the road surface while preserving 
-        // measurements on the obstacles in the scene.
+            cv::circle(topviewImg, cv::Point(x, y), 5, color, -1);
+            
+            // TODO: 
+            // 1. Change the color of the Lidar points such that 
+            // X=0.0m corresponds to red while X=20.0m is shown as green.
+            // 2. Remove all Lidar points on the road surface while preserving 
+            // measurements on the obstacles in the scene.
+        }
     }
 
     // plot distance markers
